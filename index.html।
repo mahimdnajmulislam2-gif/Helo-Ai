@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Helo AI - Nazmul</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#101b32;color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ background:#1769e0;padding:20px;
+ text-align:center;font-size:28px;font-weight:bold;
+}
+#chat{
+ height:65vh;overflow-y:auto;padding:15px;
+}
+.msg{
+ background:#233653;padding:14px;
+ border-radius:14px;margin:12px 0;
+ line-height:1.7;overflow-wrap:anywhere;
+}
+.user{background:#1769e0;text-align:right}
+.controls{
+ position:fixed;bottom:0;width:100%;
+ background:#152541;padding:12px;
+ display:flex;gap:7px;flex-wrap:wrap;
+}
+input{
+ flex:1;min-width:120px;padding:14px;
+ border:0;border-radius:25px;font-size:16px;
+}
+button{
+ border:0;border-radius:22px;
+ background:#287cff;color:white;
+ padding:13px;font-size:16px;
+}
+</style>
+</head>
+<body>
+
+<header>🤖 Helo AI</header>
+<div style="text-align:center;padding:10px;color:#bcd2ff">
+Created by Nazmul
+</div>
+
+<div id="chat">
+<div class="msg">
+আসসালামু আলাইকুম নাজমুল! ❤️
+আমি Helo AI। কীভাবে সাহায্য করতে পারি?
+</div>
+</div>
+
+<div class="controls">
+<input id="question" placeholder="কিছু লিখুন...">
+<button onclick="send()">পাঠান</button>
+<button onclick="speak()">🎤</button>
+</div>
+
+<script>
+function reply(q){
+ q=q.toLowerCase();
+
+ if(q.includes("কে তৈরি") ||
+ q.includes("কে বানিয়েছে") ||
+ q.includes("কে বানাইছে") ||
+ q.includes("কে বানিয়েছে")){
+ return "আমাকে তৈরি করেছেন নাজমুল। আমার নাম Helo AI।";
+ }
+
+ if(q.includes("তোমার নাম")){
+ return "আমার নাম Helo AI।";
+ }
+
+ if(q.includes("তোমার নির্মাতা")){
+ return "আমার নির্মাতা নাজমুল।";
+ }
+
+ if(q.includes("আসসালামু")){
+ return "ওয়ালাইকুম আসসালাম নাজমুল! ❤️";
+ }
+
+ if(q.includes("তুমি কেমন")){
+ return "আমি ভালো আছি নাজমুল! তুমি কেমন আছো?";
+ }
+
+ if(q.includes("তোমার মালিক")){
+ return "আমার নির্মাতা নাজমুল।";
+ }
+
+ return "নাজমুল, তোমার প্রশ্নটি পেয়েছি। আসল AI সংযোগ যুক্ত হলে আরও বিস্তারিত উত্তর দিতে পারব।";
+}
+
+function add(text,cls){
+ let d=document.createElement("div");
+ d.className="msg "+cls;
+ d.textContent=text;
+ document.getElementById("chat").appendChild(d);
+ document.getElementById("chat").scrollTop=
+ document.getElementById("chat").scrollHeight;
+}
+
+function send(){
+ let box=document.getElementById("question");
+ let q=box.value.trim();
+ if(!q)return;
+
+ add(q,"user");
+ let answer=reply(q);
+ add(answer,"");
+
+ box.value="";
+
+ if("speechSynthesis" in window){
+ speechSynthesis.cancel();
+ let msg=new SpeechSynthesisUtterance(answer);
+ msg.lang="bn-BD";
+ speechSynthesis.speak(msg);
+ }
+}
+
+function speak(){
+ const SR=window.SpeechRecognition||
+ window.webkitSpeechRecognition;
+
+ if(!SR){
+ alert("Voice Input এই ব্রাউজারে সমর্থিত নয়।");
+ return;
+ }
+
+ let r=new SR();
+ r.lang="bn-BD";
+ r.onresult=function(e){
+ document.getElementById("question").value=
+ e.results[0][0].transcript;
+ send();
+ };
+ r.start();
+}
+
+document.getElementById("question")
+.addEventListener("keydown",function(e){
+ if(e.key==="Enter")send();
+});
+</script>
+</body>
+</html>
