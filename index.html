@@ -3,147 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Helo AI - Nazmul</title>
+<title>Hello AI - Nazmul</title>
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;background:#101b32;color:white;
+ margin:0;
+ background:#0b1020;
+ color:white;
  font-family:Arial,sans-serif;
 }
 header{
- background:#1769e0;padding:20px;
- text-align:center;font-size:28px;font-weight:bold;
+ background:#172b55;
+ padding:17px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
 }
+.logo{font-size:25px;font-weight:bold;color:#55aaff}
+header small{color:#cbd5e1}
 #chat{
- height:65vh;overflow-y:auto;padding:15px;
+ height:calc(100vh - 155px);
+ overflow-y:auto;
+ padding:16px;
 }
+.welcome{
+ text-align:center;
+ margin:55px 10px 30px;
+}
+.robot{font-size:65px}
+.welcome h2{color:#55aaff}
 .msg{
- background:#233653;padding:14px;
- border-radius:14px;margin:12px 0;
- line-height:1.7;overflow-wrap:anywhere;
+ padding:13px;
+ margin:12px 0;
+ border-radius:15px;
+ max-width:85%;
+ line-height:1.6;
+ white-space:pre-wrap;
 }
-.user{background:#1769e0;text-align:right}
-.controls{
- position:fixed;bottom:0;width:100%;
- background:#152541;padding:12px;
- display:flex;gap:7px;flex-wrap:wrap;
+.user{
+ background:#1769e0;
+ margin-left:auto;
+}
+.ai{
+ background:#202c46;
+ margin-right:auto;
+}
+.bottom{
+ position:fixed;
+ bottom:0;
+ left:0;
+ right:0;
+ padding:12px;
+ background:#111a30;
+ display:flex;
+ gap:8px;
 }
 input{
- flex:1;min-width:120px;padding:14px;
- border:0;border-radius:25px;font-size:16px;
+ flex:1;
+ min-width:0;
+ padding:14px;
+ border:1px solid #52627e;
+ border-radius:25px;
+ background:#202c46;
+ color:white;
+ outline:none;
+ font-size:15px;
 }
 button{
- border:0;border-radius:22px;
- background:#287cff;color:white;
- padding:13px;font-size:16px;
+ border:0;
+ background:#1684ff;
+ color:white;
+ border-radius:25px;
+ padding:12px 17px;
+ font-size:16px;
 }
 </style>
 </head>
 <body>
 
-<header>🤖 Helo AI</header>
-<div style="text-align:center;padding:10px;color:#bcd2ff">
-Created by Nazmul
-</div>
+<header>
+ <div>
+  <div class="logo">🤖 Hello AI</div>
+  <small>Created by Nazmul Islam Mahi</small>
+ </div>
+ <button onclick="clearChat()">New</button>
+</header>
 
 <div id="chat">
-<div class="msg">
-আসসালামু আলাইকুম নাজমুল! ❤️
-আমি Helo AI। কীভাবে সাহায্য করতে পারি?
-</div>
+ <div class="welcome" id="welcome">
+  <div class="robot">🤖</div>
+  <h2>Welcome to Hello AI!</h2>
+  <p>আসসালামু আলাইকুম! সবাইকে Hello AI-তে স্বাগতম।</p>
+  <p>আমি Hello AI। তোমাকে কীভাবে সাহায্য করতে পারি?</p>
+  <p>নির্মাতা: নাজমুল ইসলাম মাহি</p>
+ </div>
 </div>
 
-<div class="controls">
-<input id="question" placeholder="কিছু লিখুন...">
-<button onclick="send()">পাঠান</button>
-<button onclick="speak()">🎤</button>
+<div class="bottom">
+ <input id="message" placeholder="এখানে প্রশ্ন লিখুন..."
+ onkeydown="if(event.key==='Enter')send()">
+ <button onclick="send()">Send</button>
 </div>
 
 <script>
-function reply(q){
- q=q.toLowerCase();
+const API_URL = "YOUR_WORKER_URL";
 
- if(q.includes("কে তৈরি") ||
- q.includes("কে বানিয়েছে") ||
- q.includes("কে বানাইছে") ||
- q.includes("কে বানিয়েছে")){
- return "আমাকে তৈরি করেছেন নাজমুল। আমার নাম Helo AI।";
- }
+function addMessage(text,type){
+ const chat=document.getElementById("chat");
+ document.getElementById("welcome")?.remove();
 
- if(q.includes("তোমার নাম")){
- return "আমার নাম Helo AI।";
- }
-
- if(q.includes("তোমার নির্মাতা")){
- return "আমার নির্মাতা নাজমুল।";
- }
-
- if(q.includes("আসসালামু")){
- return "ওয়ালাইকুম আসসালাম নাজমুল! ❤️";
- }
-
- if(q.includes("তুমি কেমন")){
- return "আমি ভালো আছি নাজমুল! তুমি কেমন আছো?";
- }
-
- if(q.includes("তোমার মালিক")){
- return "আমার নির্মাতা নাজমুল।";
- }
-
- return "নাজমুল, তোমার প্রশ্নটি পেয়েছি। আসল AI সংযোগ যুক্ত হলে আরও বিস্তারিত উত্তর দিতে পারব।";
+ const div=document.createElement("div");
+ div.className="msg "+type;
+ div.textContent=text;
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+ return div;
 }
 
-function add(text,cls){
- let d=document.createElement("div");
- d.className="msg "+cls;
- d.textContent=text;
- document.getElementById("chat").appendChild(d);
- document.getElementById("chat").scrollTop=
- document.getElementById("chat").scrollHeight;
-}
+async function send(){
+ const input=document.getElementById("message");
+ const question=input.value.trim();
+ if(!question)return;
 
-function send(){
- let box=document.getElementById("question");
- let q=box.value.trim();
- if(!q)return;
+ input.value="";
+ addMessage(question,"user");
 
- add(q,"user");
- let answer=reply(q);
- add(answer,"");
+ if(question.toLowerCase().includes("তোমাকে কে তৈরি করেছে") ||
+ question.toLowerCase().includes("তোমার নির্মাতা")){
+  addMessage("আমাকে তৈরি করেছেন নাজমুল ইসলাম মাহি। ❤️","ai");
+  return;
+ }
 
- box.value="";
+ const loading=addMessage("উত্তর তৈরি হচ্ছে...","ai");
 
- if("speechSynthesis" in window){
- speechSynthesis.cancel();
- let msg=new SpeechSynthesisUtterance(answer);
- msg.lang="bn-BD";
- speechSynthesis.speak(msg);
+ if(API_URL==="YOUR_WORKER_URL"){
+  loading.textContent="AI চালু করতে Cloudflare Worker API যুক্ত করতে হবে।";
+  return;
+ }
+
+ try{
+  const response=await fetch(API_URL,{
+   method:"POST",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({message:question})
+  });
+
+  const data=await response.json();
+
+  if(!response.ok)throw new Error("API Error");
+
+  loading.textContent=data.reply || "কোনো উত্তর পাওয়া যায়নি।";
+ }catch(error){
+  loading.textContent="দুঃখিত! সংযোগে সমস্যা হয়েছে। আবার চেষ্টা করো।";
  }
 }
 
-function speak(){
- const SR=window.SpeechRecognition||
- window.webkitSpeechRecognition;
-
- if(!SR){
- alert("Voice Input এই ব্রাউজারে সমর্থিত নয়।");
- return;
- }
-
- let r=new SR();
- r.lang="bn-BD";
- r.onresult=function(e){
- document.getElementById("question").value=
- e.results[0][0].transcript;
- send();
- };
- r.start();
+function clearChat(){
+ document.getElementById("chat").innerHTML=`
+ <div class="welcome" id="welcome">
+ <div class="robot">🤖</div>
+ <h2>Welcome to Hello AI!</h2>
+ <p>আসসালামু আলাইকুম! সবাইকে স্বাগতম।</p>
+ <p>নির্মাতা: নাজমুল ইসলাম মাহি</p>
+ </div>`;
 }
-
-document.getElementById("question")
-.addEventListener("keydown",function(e){
- if(e.key==="Enter")send();
-});
 </script>
 </body>
-</html>
+ </html>
